@@ -329,13 +329,11 @@ def parse(tokens: list[Token], inputFile, filePath: str, index: int = 0) -> int:
                 elif value and elseBlockIndex:
                     tokensBetweenIfAndElse: list[Token] = tokens[index:elseBlockIndex]
                     parse(tokensBetweenIfAndElse, inputFile, filePath)
-                    index += endBlockIndex
                 elif not(value) and elseBlockIndex:
                     tokensBetweenElseAndEnd: list[Token] = tokens[elseBlockIndex + 1: endBlockIndex]
                     parse(tokensBetweenElseAndEnd, inputFile, filePath)
-                    index += endBlockIndex
-                else:
-                    index += endBlockIndex
+
+                index = endBlockIndex
 
             except IndexError:
                 printError((type, position, value), "expected an else or end block", inputFile, filePath)
