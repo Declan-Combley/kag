@@ -46,7 +46,7 @@ BANG = iota()
 
 END = iota()
 
-PRINTABLE_TOKENS: list = ["SYMBOL", "NUMBER", "STRING", "UNKNOWN", "SPACE", "NEWLINE", "QUOTATION", "PLUS", "MINUS", "TIMES", "DIVIDE", "GREATER", "LESS", "GREATEREQUALS", "LESSEQUALS", "IF", "ELSE", "OVER", "DUPLICATE", "DROP", "BANG", "END"]
+PRINTABLE_TOKENS: list = ["SYMBOL", "NUMBER", "STRING", "UNKNOWN", "SPACE", "NEWLINE", "QUOTATION", "PLUS", "MINUS", "TIMES", "DIVIDE", "GREATER", "LESS", "GREATEREQUALS", "LESSEQUALS", "EQUALS", "EQUIVELANT", "IF", "ELSE", "OVER", "DUPLICATE", "DROP", "BANG", "END"]
 
 @dataclass
 class Position:
@@ -199,6 +199,9 @@ def tokenize(inputFile, filePath) -> list[Token]:
                 tokens.append((DROP, tokenPosition, buffer))
             else:
                 tokens.append((currentTokenType, tokenPosition, buffer))
+        elif currentTokenType == EQUALS and tmpTokens[index + 1][TYPE] == EQUALS:
+            tokens.append((EQUIVELANT, tokenPosition, token))
+            index += 1
         elif currentTokenType == LESS and tmpTokens[index + 1][TYPE] == EQUALS:
             tokens.append((LESSEQUAL, tokenPosition, token))
             index += 1
@@ -304,7 +307,7 @@ def parse(tokens: list[Token], inputFile, filePath: str, index: int = 0) -> int:
                 printError((type, position, value), "no value to the left of to push", inputFile, filePath)
             except Exception as Error:
                 print(Error)
-        elif type == EQUALS:
+        elif type == EQUIVELANT:
             try:
                 x = stack.pop()
                 y = stack.pop()
