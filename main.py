@@ -26,6 +26,12 @@ MINUS = iota()
 TIMES = iota()
 DIVIDE = iota()
 
+GREATER = iota()
+LESS = iota()
+
+GREATEREQUAL = iota()
+LESSEQUAL = iota()
+
 EQUALS = iota()
 
 IF = iota()
@@ -38,7 +44,7 @@ BANG = iota()
 
 END = iota()
 
-PRINTABLE_TOKENS: list = ["SYMBOL", "NUMBER", "STRING", "UNKNOWN", "SPACE", "NEWLINE", "QUOTATION", "PLUS", "MINUS", "TIMES", "DIVIDE", "EQUALS", "IF", "ELSE", "OVER", "DUPLICATE", "BANG", "END"]
+PRINTABLE_TOKENS: list = ["SYMBOL", "NUMBER", "STRING", "UNKNOWN", "SPACE", "NEWLINE", "QUOTATION", "PLUS", "MINUS", "TIMES", "DIVIDE", "GREATER", "LESS", "GREATEREQUALS", "LESSEQUALS", "IF", "ELSE", "OVER", "DUPLICATE", "BANG", "END"]
 
 @dataclass
 class Position:
@@ -58,6 +64,29 @@ class Token:
 TYPE = iota(True)
 POSITION = iota()
 VALUE = iota()
+
+
+def printError(token: Token, text: str, inputFile, filePath: str, specific: bool = True) -> None:
+    print(f"\n{filePath}:{token[POSITION].line}:{token[POSITION].col}: error: {text}")
+    inputFile.seek(0)
+
+    for i, line in enumerate(inputFile):
+        if i == token[POSITION].line - 1:
+            print(f" {token[POSITION].line} | {line.rstrip()}")
+
+    inputFile.close()
+    buffer: str = " "
+    whiteSpace: str = len(str(token[POSITION].line))
+    for i in range(whiteSpace):
+        buffer += " "
+    print(f"{buffer} | ", end="")
+
+    for i in range(token[POSITION].col - whiteSpace):
+        print(" ", end="")
+    for i in range(len(str(token[VALUE]))):
+        print("~", end="")
+    print("\n")
+    exit(1)
 
 
 def characterToToken(char: str) -> int:
@@ -85,33 +114,14 @@ def characterToToken(char: str) -> int:
         return BANG
     elif char == '=':
         return EQUALS
+    elif char == '>':
+        return GREATER
+    elif char == '<':
+        return LESS
     elif char == '"':
         return QUOTATION
     else:
         return UNKNOWN
-
-
-def printError(token: Token, text: str, inputFile, filePath: str, specific: bool = True) -> None:
-    print(f"\n{filePath}:{token[POSITION].line}:{token[POSITION].col}: error: {text}")
-    inputFile.seek(0)
-
-    for i, line in enumerate(inputFile):
-        if i == token[POSITION].line - 1:
-            print(f" {token[POSITION].line} | {line.rstrip()}")
-
-    inputFile.close()
-    buffer: str = " "
-    whiteSpace: str = len(str(token[POSITION].line))
-    for i in range(whiteSpace):
-        buffer += " "
-    print(f"{buffer} | ", end="")
-
-    for i in range(token[POSITION].col - whiteSpace):
-        print(" ", end="")
-    for i in range(len(str(token[VALUE]))):
-        print("~", end="")
-    print("\n")
-    exit(1)
 
 
 def tokenize(inputFile, filePath) -> list[Token]:
@@ -185,6 +195,12 @@ def tokenize(inputFile, filePath) -> list[Token]:
                 tokens.append((END, tokenPosition, buffer))
             else:
                 tokens.append((currentTokenType, tokenPosition, buffer))
+        elif currentTokenType == LESS and tmpTokens[index + 1][TYPE] == EQUALS:
+            tokens.append((LESSEQUAL, tokenPosition, token))
+            index += 1
+        elif currentTokenType == GREATER and tmpTokens[index + 1][TYPE] == EQUALS:
+            tokens.append((GREATEREQUAL, tokenPosition, token))
+            index += 1
         else:
             tokens.append((currentTokenType, tokenPosition, token))
         index += 1
@@ -290,6 +306,74 @@ def parse(tokens: list[Token], inputFile, filePath: str, index: int = 0) -> int:
                 y = stack.pop()
 
                 if x == y:
+                    stack.append(y)
+                    stack.append(x)
+                    stack.append(1)
+                else:
+                    stack.append(y)
+                    stack.append(x)
+                    stack.append(0)
+            except IndexError:
+                printError((type, position, value), "stack does not have enough values to compare", inputFile, filePath)
+            except Exception as Error:
+                print(Error)
+        elif type == GREATER:
+            try:
+                x = stack.pop()
+                y = stack.pop()
+
+                if x > y:
+                    stack.append(y)
+                    stack.append(x)
+                    stack.append(1)
+                else:
+                    stack.append(y)
+                    stack.append(x)
+                    stack.append(0)
+            except IndexError:
+                printError((type, position, value), "stack does not have enough values to compare", inputFile, filePath)
+            except Exception as Error:
+                print(Error)
+        elif type == LESS:
+            try:
+                x = stack.pop()
+                y = stack.pop()
+
+                if x < y:
+                    stack.append(y)
+                    stack.append(x)
+                    stack.append(1)
+                else:
+                    stack.append(y)
+                    stack.append(x)
+                    stack.append(0)
+            except IndexError:
+                printError((type, position, value), "stack does not have enough values to compare", inputFile, filePath)
+            except Exception as Error:
+                print(Error)
+        elif type == LESSEQUAL:
+            try:
+                x = stack.pop()
+                y = stack.pop()
+
+                if x <= y:
+                    stack.append(y)
+                    stack.append(x)
+                    stack.append(1)
+                else:
+                    stack.append(y)
+                    stack.append(x)
+                    stack.append(0)
+            except IndexError:
+                printError((type, position, value), "stack does not have enough values to compare", inputFile, filePath)
+            except Exception as Error:
+                print(Error)
+        elif type == GREATEREQUAL:
+            try:
+                x = stack.pop()
+                y = stack.pop()
+
+                if x >= y:
                     stack.append(y)
                     stack.append(x)
                     stack.append(1)
