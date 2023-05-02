@@ -322,15 +322,16 @@ def parse(tokens: list[Token], inputFile, filePath: str, index: int = 0) -> int:
                         elseBlockIndex = index + endBlockIndex
                     endBlockIndex += 1
 
+                endBlockIndex = index + endBlockIndex
                 if value and elseBlockIndex == None:
-                    tokesnBetweenIfAndEnd: list[Token] = tokens[index:index + endBlockIndex]
+                    tokesnBetweenIfAndEnd: list[Token] = tokens[index:endBlockIndex]
                     index += parse(tokesnBetweenIfAndEnd, inputFile, filePath)
                 elif value and elseBlockIndex:
                     tokensBetweenIfAndElse: list[Token] = tokens[index:elseBlockIndex]
                     parse(tokensBetweenIfAndElse, inputFile, filePath)
                     index += endBlockIndex
                 elif not(value) and elseBlockIndex:
-                    tokensBetweenElseAndEnd: list[Token] = tokens[elseBlockIndex + 1: - 1]
+                    tokensBetweenElseAndEnd: list[Token] = tokens[elseBlockIndex + 1: endBlockIndex]
                     parse(tokensBetweenElseAndEnd, inputFile, filePath)
                     index += endBlockIndex
                 else:
