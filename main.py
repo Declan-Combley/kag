@@ -282,7 +282,7 @@ def parse(tokens: list[Token], inputFile, filePath: str, index: int = 0) -> int:
                 printError((type, position, value), Error, inputFile, filePath)
         elif type == DUPLICATE:
             try:
-                x = int(stack.pop())
+                x = stack.pop()
                 stack.append(x)
                 stack.append(x)
             except IndexError:
@@ -291,8 +291,8 @@ def parse(tokens: list[Token], inputFile, filePath: str, index: int = 0) -> int:
                 print(Error)
         elif type == OVER:
             try:
-                x = int(stack.pop())
-                y = int(stack.pop())
+                x = stack.pop()
+                y = stack.pop()
                 stack.append(y)
                 stack.append(x)
                 stack.append(y)
@@ -315,6 +315,8 @@ def parse(tokens: list[Token], inputFile, filePath: str, index: int = 0) -> int:
                     stack.append(0)
             except IndexError:
                 printError((type, position, value), "stack does not have enough values to compare", inputFile, filePath)
+            except ValueError or TypeError:
+                printError((type, position, value), "expected two stack values of the same type", inputFile, filePath)
             except Exception as Error:
                 print(Error)
         elif type == GREATER:
@@ -332,6 +334,8 @@ def parse(tokens: list[Token], inputFile, filePath: str, index: int = 0) -> int:
                     stack.append(0)
             except IndexError:
                 printError((type, position, value), "stack does not have enough values to compare", inputFile, filePath)
+            except TypeError:
+                printError((type, position, value), "cannot compare a non integer value", inputFile, filePath)
             except Exception as Error:
                 print(Error)
         elif type == LESS:
@@ -349,6 +353,8 @@ def parse(tokens: list[Token], inputFile, filePath: str, index: int = 0) -> int:
                     stack.append(0)
             except IndexError:
                 printError((type, position, value), "stack does not have enough values to compare", inputFile, filePath)
+            except TypeError:
+                printError((type, position, value), "cannot compare a non integer value", inputFile, filePath)
             except Exception as Error:
                 print(Error)
         elif type == LESSEQUAL:
@@ -366,6 +372,8 @@ def parse(tokens: list[Token], inputFile, filePath: str, index: int = 0) -> int:
                     stack.append(0)
             except IndexError:
                 printError((type, position, value), "stack does not have enough values to compare", inputFile, filePath)
+            except TypeError:
+                printError((type, position, value), "cannot compare a non integer value", inputFile, filePath)
             except Exception as Error:
                 print(Error)
         elif type == GREATEREQUAL:
@@ -383,6 +391,10 @@ def parse(tokens: list[Token], inputFile, filePath: str, index: int = 0) -> int:
                     stack.append(0)
             except IndexError:
                 printError((type, position, value), "stack does not have enough values to compare", inputFile, filePath)
+            except ValueError:
+                printError((type, position, value), "expected an integer", inputFile, filePath)
+            except TypeError:
+                printError((type, position, value), "cannot compare a non integer value", inputFile, filePath)
             except Exception as Error:
                 print(Error)
         elif type == BANG:
