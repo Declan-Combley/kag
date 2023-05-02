@@ -33,18 +33,20 @@ GREATEREQUAL = iota()
 LESSEQUAL = iota()
 
 EQUALS = iota()
+EQUIVELANT = iota()
 
 IF = iota()
 ELSE = iota()
 
 OVER = iota()
 DUPLICATE = iota()
+DROP = iota()
 
 BANG = iota()
 
 END = iota()
 
-PRINTABLE_TOKENS: list = ["SYMBOL", "NUMBER", "STRING", "UNKNOWN", "SPACE", "NEWLINE", "QUOTATION", "PLUS", "MINUS", "TIMES", "DIVIDE", "GREATER", "LESS", "GREATEREQUALS", "LESSEQUALS", "IF", "ELSE", "OVER", "DUPLICATE", "BANG", "END"]
+PRINTABLE_TOKENS: list = ["SYMBOL", "NUMBER", "STRING", "UNKNOWN", "SPACE", "NEWLINE", "QUOTATION", "PLUS", "MINUS", "TIMES", "DIVIDE", "GREATER", "LESS", "GREATEREQUALS", "LESSEQUALS", "IF", "ELSE", "OVER", "DUPLICATE", "DROP", "BANG", "END"]
 
 @dataclass
 class Position:
@@ -193,6 +195,8 @@ def tokenize(inputFile, filePath) -> list[Token]:
                 tokens.append((ELSE, tokenPosition, buffer))
             elif buffer == "end":
                 tokens.append((END, tokenPosition, buffer))
+            elif buffer == "drop":
+                tokens.append((DROP, tokenPosition, buffer))
             else:
                 tokens.append((currentTokenType, tokenPosition, buffer))
         elif currentTokenType == LESS and tmpTokens[index + 1][TYPE] == EQUALS:
@@ -400,6 +404,13 @@ def parse(tokens: list[Token], inputFile, filePath: str, index: int = 0) -> int:
         elif type == BANG:
             try:
                 print(stack.pop())
+            except IndexError:
+                printError((type, position, value), "stack does not have any value to print", inputFile, filePath)
+            except Exception as Error:
+                print(Error)
+        elif type == DROP:
+            try:
+                stack.pop()
             except IndexError:
                 printError((type, position, value), "stack does not have any value to print", inputFile, filePath)
             except Exception as Error:
