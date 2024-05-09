@@ -307,7 +307,7 @@ def parse(tokens: list[Token], inputFile, filePath: str, index: int = 0) -> int:
                 printError((type, position, value), "no value to the left of to push", inputFile, filePath)
             except Exception as Error:
                 print(Error)
-        elif type == EQUIVELANT:
+        elif type == EQUALS:
             try:
                 x = stack.pop()
                 y = stack.pop()
